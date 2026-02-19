@@ -1,0 +1,29 @@
+name: shop_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^4.4.0
+  google_fonts: ^6.3.2
+  cloud_firestore: ^6.1.2
+  firebase_auth: ^6.1.4
+  lucide_icons_flutter: ^3.1.9
+  intl: ^0.20.2
+  fl_chart: ^1.1.1
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884611629753",
+    "project_id": "msf2026-dfd1c",
+    "storage_bucket": "msf2026-dfd1c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884611629753:android:9a6b54752908f2d01f1168",
+        "android_client_info": {
+          "package_name": "com.example.adminapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwC8XYOKf8tx4zcbYrIcxx1G0hYEJ6-RM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
