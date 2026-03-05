@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Required for inputFormatters
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomerRegistration extends StatefulWidget {
-  final String? preSelectedCoupon; // Receives code from Inventory
+  final String? preSelectedCoupon;
 
   const CustomerRegistration({super.key, this.preSelectedCoupon});
 
@@ -19,7 +20,7 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
 
-  String? _selectedCoupon; 
+  String? _selectedCoupon;
   bool _isSaving = false;
 
   final Color _brandColor = const Color(0xFF009ADE);
@@ -30,8 +31,25 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
   @override
   void initState() {
     super.initState();
-    // Use the coupon passed from Inventory if available
     _selectedCoupon = widget.preSelectedCoupon;
+  }
+
+  // --- VALIDATION LOGIC ---
+
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) return "Name is required";
+    if (value.trim().length < 2) return "Enter a valid name";
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.isEmpty) return "Contact Number is required";
+    // Regex: Starts with 6,7,8 or 9 and has exactly 10 digits
+    final phoneRegex = RegExp(r'^[6-9]\d{9}$');
+    if (!phoneRegex.hasMatch(value)) {
+      return "Enter a valid 10-digit number (starts 6-9)";
+    }
+    return null;
   }
 
   // --- SAVE CUSTOMER & CONSUME COUPON ---
@@ -54,7 +72,6 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
         String? shopId = FirebaseAuth.instance.currentUser?.uid;
         if (shopId == null) throw "Authentication error";
 
-        // Use a Batch to ensure both actions happen together
         WriteBatch batch = firestore.batch();
 
         // 1. Add Customer record
@@ -67,8 +84,7 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        // 2. Mark Coupon as used in assigned_coupons
-        // Note: The document ID in assigned_coupons must be the coupon code for this to work
+        // 2. Mark Coupon as used
         DocumentReference couponRef = firestore
             .collection('assigned_coupons')
             .doc(_selectedCoupon);
@@ -77,15 +93,14 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
         await batch.commit();
 
         if (!mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Member Registered Successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        
-        // Go back to inventory/previous page
+
         Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +148,7 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
               ),
               const SizedBox(height: 30),
 
-              // --- COUPON DISPLAY BOX (Fixed Design) ---
+              // --- COUPON DISPLAY BOX ---
               Text(
                 'Assigned Coupon Code',
                 style: GoogleFonts.poppins(
@@ -179,7 +194,7 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
                 label: 'Customer Name',
                 hint: 'Enter full name',
                 icon: LucideIcons.user,
-                validator: (v) => v!.isEmpty ? 'Enter name' : null,
+                validator: _validateName,
               ),
               const SizedBox(height: 20),
 
@@ -190,7 +205,12 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
                 hint: '10 digit mobile number',
                 icon: LucideIcons.phone,
                 keyboardType: TextInputType.phone,
-                validator: (v) => v!.length < 10 ? 'Enter valid contact' : null,
+                // Limits input to numbers and max 10 characters
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                validator: _validatePhone,
               ),
 
               const SizedBox(height: 50),
@@ -208,7 +228,14 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
                     ),
                   ),
                   child: _isSaving
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
                       : Text(
                           'COMPLETE REGISTRATION',
                           style: GoogleFonts.poppins(
@@ -225,13 +252,13 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
     );
   }
 
-  // Helper function to keep the UI exactly as per your previous request
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -249,16 +276,21 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           validator: validator,
+          style: GoogleFonts.poppins(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 14),
             prefixIcon: Icon(icon, color: Colors.grey, size: 20),
             filled: true,
             fillColor: _inputBg,
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
+            errorStyle: GoogleFonts.poppins(fontSize: 12),
           ),
         ),
       ],

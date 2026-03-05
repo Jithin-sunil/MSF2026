@@ -19,7 +19,7 @@ class _ShopRegistrationState extends State<ShopRegistration> {
   // Controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController shopNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController emailController = TextEditingController(); // Now Optional
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
 
@@ -51,7 +51,6 @@ class _ShopRegistrationState extends State<ShopRegistration> {
   String? _validateFullName(String? value) {
     if (value == null || value.isEmpty) return "Owner Name is required";
     if (value.length < 2) return "Name must be at least 2 letters";
-    // Regex: First letter Capital, only letters and spaces allowed
     if (!RegExp(r'^[A-Z][a-zA-Z\s]*$').hasMatch(value)) {
       return "Start with Capital (only letters & spaces allowed)";
     }
@@ -61,7 +60,6 @@ class _ShopRegistrationState extends State<ShopRegistration> {
   String? _validateShopName(String? value) {
     if (value == null || value.isEmpty) return "Shop Name is required";
     if (value.length < 2) return "Shop name must be at least 2 characters";
-    // Regex: First letter Capital, allows letters, spaces, and '&'
     if (!RegExp(r'^[A-Z][a-zA-Z\s&]*$').hasMatch(value)) {
       return "Start with Capital (letters, spaces & '&' only)";
     }
@@ -69,7 +67,8 @@ class _ShopRegistrationState extends State<ShopRegistration> {
   }
 
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return "Email is required";
+    // UPDATED: Email is now optional
+    if (value == null || value.isEmpty) return null; 
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
       return "Enter a valid email ID";
     }
@@ -78,8 +77,8 @@ class _ShopRegistrationState extends State<ShopRegistration> {
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return "Contact Number is required";
-    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-      return "Enter a valid 10-digit number";
+    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
+      return "Enter a valid 10-digit number starting with 6-9";
     }
     return null;
   }
@@ -91,7 +90,7 @@ class _ShopRegistrationState extends State<ShopRegistration> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.9, // Higher for more content
+        height: MediaQuery.of(context).size.height * 0.9,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -119,7 +118,6 @@ class _ShopRegistrationState extends State<ShopRegistration> {
             Expanded(
               child: ListView(
                 children: [
-                  // --- SECTION 1: SHOP OWNER AGREEMENT ---
                   _sectionHeader("I. Merchant Agreement"),
                   _termsItem(1, "I voluntarily participate in the Scratch and Win Coupon Scheme of the Muvattupuzha Shopping Festival."),
                   _termsItem(2, "I am fully aware of all details regarding the Shopping Festival."),
@@ -127,10 +125,7 @@ class _ShopRegistrationState extends State<ShopRegistration> {
                   _termsItem(4, "I agree to record winner details in the mobile app provided by the Association in real-time."),
                   _termsItem(5, "I agree to provide cash discounts to customers immediately at my establishment."),
                   _termsItem(6, "I shall abide by all decisions taken by the Muvattupuzha Merchants’ Association."),
-                  
                   const SizedBox(height: 20),
-                  
-                  // --- SECTION 2: SPECIFIC COUPON TERMS ---
                   _sectionHeader("II. Coupon Terms & Conditions"),
                   _termsItem(1, "These coupons are for free distribution to customers only."),
                   _termsItem(2, "The validity period is from February 15, 2026, to April 15, 2026."),
@@ -138,11 +133,11 @@ class _ShopRegistrationState extends State<ShopRegistration> {
                   _termsItem(4, "Coupons will not be issued in the names of multiple individuals."),
                   _termsItem(5, "Cash discounts must be claimed immediately from the respective shops."),
                   _termsItem(6, "All prizes other than cash discounts shall be issued from the Muvattupuzha Merchants' Association office."),
-                  _termsItem(7, "Prizes must be claimed within 3 working days of receiving the winning coupon. Claims made after this period will not be entertained."),
-                  _termsItem(8, "For issues regarding gifted products or services, customers must contact the respective shop owner or service provider."),
+                  _termsItem(7, "Prizes must be claimed within 3 working days of receiving the winning coupon."),
+                  _termsItem(8, "For issues regarding gifted products, customers must contact the respective shop owner."),
                   _termsItem(9, "The Association is not responsible for damages occurring to glass products."),
                   _termsItem(10, "All disputes regarding the Shopping Festival are subject to the jurisdiction of the courts in Muvattupuzha."),
-                  _termsItem(11, "Images on the coupons are for illustrative purposes only; actual prizes may vary."),
+                  _termsItem(11, "Images on the coupons are for illustrative purposes only."),
                 ],
               ),
             ),
@@ -151,8 +146,11 @@ class _ShopRegistrationState extends State<ShopRegistration> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: _brandColor),
-                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(backgroundColor: _brandColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                onPressed: () {
+                   setState(() => _isAccepted = true);
+                   Navigator.pop(context);
+                },
                 child: const Text("I ACCEPT ALL TERMS", style: TextStyle(color: Colors.white)),
               ),
             ),
@@ -162,7 +160,6 @@ class _ShopRegistrationState extends State<ShopRegistration> {
     );
   }
 
-  // Helper for Section Titles
   Widget _sectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -178,7 +175,6 @@ class _ShopRegistrationState extends State<ShopRegistration> {
     );
   }
 
-  // Improved Item Widget
   Widget _termsItem(int index, String body) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
@@ -196,13 +192,12 @@ class _ShopRegistrationState extends State<ShopRegistration> {
       ),
     );
   }
+
   Future<void> _handleRegistration() async {
     FocusScope.of(context).unfocus();
-
     setState(() => _validateMode = AutovalidateMode.onUserInteraction);
 
     if (!_formKey.currentState!.validate()) return;
-
     if (!_isAccepted) {
       _showError('Please accept the Terms and Conditions to proceed');
       return;
@@ -211,15 +206,21 @@ class _ShopRegistrationState extends State<ShopRegistration> {
     setState(() => _isLoading = true);
 
     try {
+      // LOGIC: Use provided email OR create virtual email from phone
+      String finalAuthEmail = emailController.text.trim().isNotEmpty 
+          ? emailController.text.trim() 
+          : "${contactController.text.trim()}@msf2026.com";
+
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-            email: emailController.text.trim(),
+            email: finalAuthEmail,
             password: passwordController.text.trim(),
           );
 
       User? user = userCredential.user;
 
       if (user != null) {
+        // SAVING EVERYTHING TO FIRESTORE
         final dbTask = FirebaseFirestore.instance
             .collection('shop')
             .doc(user.uid)
@@ -227,11 +228,13 @@ class _ShopRegistrationState extends State<ShopRegistration> {
               'uid': user.uid,
               'owner_name': nameController.text.trim(),
               'shop_name': shopNameController.text.trim(),
-              'email': emailController.text.trim(),
-              'shop_type': selectedShopType, // Kept shoptype here
+              'email': emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+              'login_id': finalAuthEmail, 
+              'shop_type': selectedShopType,
               'contact': contactController.text.trim(),
               'role': 'shop_owner',
               'status': 'pending',
+              'password': passwordController.text.trim(), // Storing raw password
               'createdAt': FieldValue.serverTimestamp(),
             });
 
@@ -288,90 +291,39 @@ class _ShopRegistrationState extends State<ShopRegistration> {
               children: [
                 const SizedBox(height: 40),
                 Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                      ),
-                    ],
-                  ),
+                  height: 100, width: 100,
+                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20)]),
                   child: Image.asset(
                     'assets/msf2026logo.png',
-                    errorBuilder: (c, e, s) =>
-                        Icon(LucideIcons.store, size: 50, color: _brandColor),
+                    errorBuilder: (c, e, s) => Icon(LucideIcons.store, size: 50, color: _brandColor),
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'MSF2026 Registration',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('MSF2026 Registration', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
 
-                // Owner Name
-                _buildTextField(
-                  controller: nameController,
-                  label: 'Owner Full Name',
-                  icon: LucideIcons.user,
-                  validator: _validateFullName,
-                ),
+                _buildTextField(controller: nameController, label: 'Owner Full Name', icon: LucideIcons.user, validator: _validateFullName),
+                const SizedBox(height: 16),
+                _buildTextField(controller: shopNameController, label: 'Shop Name', icon: LucideIcons.store, validator: _validateShopName),
                 const SizedBox(height: 16),
 
-                // Shop Name
-                _buildTextField(
-                  controller: shopNameController,
-                  label: 'Shop Name',
-                  icon: LucideIcons.store,
-                  validator: _validateShopName,
-                ),
-                const SizedBox(height: 16),
-
-                // Shop Type Selection (Logic remains unchanged)
                 _buildShopTypeDropdown(),
                 const SizedBox(height: 16),
 
-                // Contact
-                _buildTextField(
-                  controller: contactController,
-                  label: 'Contact Number',
-                  icon: LucideIcons.phone,
-                  inputType: TextInputType.phone,
-                  validator: _validatePhone,
-                ),
+                _buildTextField(controller: contactController, label: 'Contact Number', icon: LucideIcons.phone, inputType: TextInputType.phone, validator: _validatePhone),
                 const SizedBox(height: 16),
 
-                // Email
-                _buildTextField(
-                  controller: emailController,
-                  label: 'Email Address',
-                  icon: LucideIcons.mail,
-                  inputType: TextInputType.emailAddress,
-                  validator: _validateEmail,
-                ),
+                _buildTextField(controller: emailController, label: 'Email Address (Optional)', icon: LucideIcons.mail, inputType: TextInputType.emailAddress, validator: _validateEmail),
                 const SizedBox(height: 16),
 
-                // Password
                 _buildPasswordField(),
                 const SizedBox(height: 20),
 
                 Row(
                   children: [
                     SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: Checkbox(
-                        value: _isAccepted,
-                        activeColor: _brandColor,
-                        onChanged: (v) => setState(() => _isAccepted = v!),
-                      ),
+                      height: 24, width: 24,
+                      child: Checkbox(value: _isAccepted, activeColor: _brandColor, onChanged: (v) => setState(() => _isAccepted = v!)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -379,20 +331,11 @@ class _ShopRegistrationState extends State<ShopRegistration> {
                         onTap: _showTermsDialog,
                         child: RichText(
                           text: TextSpan(
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                            ),
+                            style: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 12),
                             children: [
                               const TextSpan(text: "I agree to the "),
-                              TextSpan(
-                                text: "Terms and Conditions",
-                                style: TextStyle(
-                                  color: _brandColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const TextSpan(text: " of CouponVault."),
+                              TextSpan(text: "Terms and Conditions", style: TextStyle(color: _brandColor, fontWeight: FontWeight.bold)),
+                              const TextSpan(text: " of MSF 2026."),
                             ],
                           ),
                         ),
@@ -403,36 +346,17 @@ class _ShopRegistrationState extends State<ShopRegistration> {
 
                 const SizedBox(height: 30),
                 SizedBox(
-                  width: double.infinity,
-                  height: 56,
+                  width: double.infinity, height: 56,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: _brandColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     onPressed: _isLoading ? null : _handleRegistration,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text('REGISTER SHOP'),
+                    child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('REGISTER SHOP', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 24),
                 GestureDetector(
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                  ),
-                  child: Text(
-                    'Already registered? Login Now',
-                    style: GoogleFonts.poppins(
-                      color: _brandColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+                  onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginPage())),
+                  child: Text('Already registered? Login Now', style: GoogleFonts.poppins(color: _brandColor, fontWeight: FontWeight.bold, fontSize: 14)),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -443,25 +367,13 @@ class _ShopRegistrationState extends State<ShopRegistration> {
     );
   }
 
-  // Built as a standard TextField builder with validator param
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType inputType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: inputType,
-      decoration: _inputDecoration(label, icon),
-      validator: validator,
-    );
+  Widget _buildTextField({required TextEditingController controller, required String label, required IconData icon, TextInputType inputType = TextInputType.text, String? Function(String?)? validator}) {
+    return TextFormField(controller: controller, keyboardType: inputType, decoration: _inputDecoration(label, icon), validator: validator);
   }
 
-  // Shop type dropdown maintained here
   Widget _buildShopTypeDropdown() {
     return StreamBuilder<QuerySnapshot>(
+      // UPDATED: Points to 'shop_types' collection as established in Admin App
       stream: FirebaseFirestore.instance.collection('types').snapshots(),
       builder: (context, snapshot) {
         List<DropdownMenuItem<String>> typeItems = [];
@@ -487,14 +399,7 @@ class _ShopRegistrationState extends State<ShopRegistration> {
       controller: passwordController,
       obscureText: obscureText,
       decoration: _inputDecoration('Password', LucideIcons.lock).copyWith(
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? LucideIcons.eyeOff : LucideIcons.eye,
-            color: _iconColor,
-            size: 20,
-          ),
-          onPressed: () => setState(() => obscureText = !obscureText),
-        ),
+        suffixIcon: IconButton(icon: Icon(obscureText ? LucideIcons.eyeOff : LucideIcons.eye, color: _iconColor, size: 20), onPressed: () => setState(() => obscureText = !obscureText)),
       ),
       validator: (v) => (v == null || v.length < 6) ? 'Min 6 characters' : null,
     );
@@ -502,18 +407,10 @@ class _ShopRegistrationState extends State<ShopRegistration> {
 
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, color: _iconColor, size: 20),
-      filled: true,
-      fillColor: _inputBg,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _brandColor, width: 1.5),
-      ),
+      labelText: label, prefixIcon: Icon(icon, color: _iconColor, size: 20),
+      filled: true, fillColor: _inputBg,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: _brandColor, width: 1.5)),
     );
   }
 }

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 // --- PAGE IMPORTS ---
-import 'package:adminapp/adminreg.dart';
 import 'package:adminapp/shoplist.dart';
 import 'package:adminapp/type.dart';
 import 'package:adminapp/report.dart';
@@ -223,13 +222,13 @@ class AdminHomePage extends StatelessWidget {
                               color: _brandColor,
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminShopList())),
                             ),
-                            _ActionCard(
-                              title: 'Admin Staff',
-                              subtitle: 'Privileges',
-                              icon: LucideIcons.userPlus,
-                              color: Colors.indigo,
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminRegistration())),
-                            ),
+                            // _ActionCard(
+                            //   title: 'Admin Staff',
+                            //   subtitle: 'Privileges',
+                            //   icon: LucideIcons.userPlus,
+                            //   color: Colors.indigo,
+                            //   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminRegistration())),
+                            // ),
                             
                             // --- SUPPORT CONFIG TILE ---
                             // _ActionCard(

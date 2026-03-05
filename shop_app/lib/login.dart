@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController(); // Changed from email to username
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -36,15 +36,26 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+      
+      String input = _usernameController.text.trim();
+      String finalAuthEmail = input;
+
+      // LOGIC: Check if the input is a 10-digit mobile number
+      // If it is, convert it to the internal Virtual Email ID
+      if (RegExp(r'^[6-9]\d{9}$').hasMatch(input)) {
+        finalAuthEmail = "$input@msf2026.com";
+      }
+
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
+          email: finalAuthEmail,
           password: _passwordController.text.trim(),
         );
 
         final user = userCredential.user;
         if (user != null) {
+          // Verify that this user exists in the 'shop' collection
           final shopDoc = await FirebaseFirestore.instance
               .collection('shop')
               .doc(user.uid)
@@ -58,11 +69,15 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else {
             await FirebaseAuth.instance.signOut();
-            _showError('Access Denied: No shop record found.');
+            _showError('Access Denied: Not a registered shop.');
           }
         }
       } on FirebaseAuthException catch (e) {
-        _showError('Invalid email or password ID');
+        // Provide a clearer error for the user
+        String msg = "Invalid login details";
+        if (e.code == 'user-not-found') msg = "Account not found";
+        if (e.code == 'wrong-password') msg = "Incorrect password";
+        _showError(msg);
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -83,7 +98,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Detect if the keyboard is open
     final bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom != 0;
 
     return Scaffold(
@@ -103,13 +117,11 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 20),
-                        
-                        // --- LOGO SECTION ---
                         Hero(
                           tag: 'app_logo',
                           child: Container(
-                            height: 160,
-                            width: 160,
+                            height: 140,
+                            width: 140,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
@@ -127,42 +139,40 @@ class _LoginPageState extends State<LoginPage> {
                                 'assets/msf2026logo.png', 
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    Icon(Icons.event_available, size: 80, color: _brandColor),
+                                    Icon(Icons.storefront_rounded, size: 70, color: _brandColor),
                               ),
                             ),
                           ),
                         ),
 
                         const SizedBox(height: 24),
-                        
                         Text(
-                          "ORGANIZED BY",
+                          "MERCHANT LOGIN",
                           style: GoogleFonts.poppins(
-                            fontSize: 10,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                            color: Colors.grey.shade400,
+                            letterSpacing: 1,
+                            color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Merchants Association Muvattupuzha',
+                          'Muvattupuzha Shopping Festival 2026',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
                         ),
 
                         const SizedBox(height: 40),
 
                         _buildTextField(
-                          controller: _emailController,
-                          label: 'Email ID',
-                          icon: Icons.alternate_email_rounded,
+                          controller: _usernameController,
+                          label: 'Mobile Number or Email', // Updated UI Label
+                          icon: Icons.person_outline_rounded,
                           inputType: TextInputType.emailAddress,
-                          validator: (value) => (value == null || value.isEmpty) ? 'Please enter email' : null,
+                          validator: (value) => (value == null || value.isEmpty) ? 'Please enter mobile or email' : null,
                         ),
 
                         const SizedBox(height: 20),
@@ -204,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Text("New merchant? ", style: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 14)),
                             GestureDetector(
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopRegistration())),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const  ShopRegistration())),
                               child: Text('Register Now', style: GoogleFonts.poppins(color: _brandColor, fontWeight: FontWeight.bold, fontSize: 14)),
                             ),
                           ],
@@ -217,7 +227,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             
-            // --- BUILD BY FOOTER SECTION (Hidden when keyboard is active) ---
             if (!isKeyboardOpen)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
@@ -232,15 +241,10 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.grey.shade400,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Image.asset(
-                      'assets/psst.png', 
-                      height: 40,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Text(
-                        "Progressive Software Solutions",
-                        style: GoogleFonts.poppins(fontSize: 10, color: Colors.black45),
-                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Progressive Software Solutions",
+                      style: GoogleFonts.poppins(fontSize: 10, color: Colors.black45, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -268,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[500]),
-        prefixIcon: Icon(icon, color: _brandColor.withOpacity(0.7), size: 20),
+        prefixIcon: Icon(icon, color: _brandColor, size: 20),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(

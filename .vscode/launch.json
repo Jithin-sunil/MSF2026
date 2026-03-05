@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "adminapp",
+            "cwd": "adminapp",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "adminapp (profile mode)",
+            "cwd": "adminapp",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "adminapp (release mode)",
+            "cwd": "adminapp",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shop_app",
+            "cwd": "shop_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shop_app (profile mode)",
+            "cwd": "shop_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shop_app (release mode)",
+            "cwd": "shop_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
